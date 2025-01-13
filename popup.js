@@ -1,8 +1,37 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   const captureFullPageBtn = document.getElementById('captureFullPage');
   const captureSelectionBtn = document.getElementById('captureSelection');
   const connectFigmaBtn = document.getElementById('connectFigma');
   const statusDiv = document.getElementById('status');
+  const versionSpan = document.getElementById('version');
+  const authStatusDiv = document.getElementById('authStatus');
+
+  // Показываем версию расширения
+  const manifest = chrome.runtime.getManifest();
+  versionSpan.textContent = manifest.version;
+
+  // Проверяем статус авторизации
+  async function checkAuthStatus() {
+    try {
+      const { figmaAccessToken } = await chrome.storage.local.get('figmaAccessToken');
+      if (figmaAccessToken) {
+        authStatusDiv.textContent = 'Подключено к Figma';
+        authStatusDiv.classList.add('authorized');
+        authStatusDiv.classList.remove('unauthorized');
+        connectFigmaBtn.textContent = 'Переподключить Figma';
+      } else {
+        authStatusDiv.textContent = 'Требуется подключение к Figma';
+        authStatusDiv.classList.add('unauthorized');
+        authStatusDiv.classList.remove('authorized');
+        connectFigmaBtn.textContent = 'Подключить Figma';
+      }
+    } catch (error) {
+      console.error('Ошибка при проверке статуса авторизации:', error);
+    }
+  }
+
+  // Проверяем статус при открытии
+  await checkAuthStatus();
 
   // Захват всей страницы
   captureFullPageBtn.addEventListener('click', async () => {
@@ -74,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
       chrome.identity.launchWebAuthFlow({
         url: authUrl,
         interactive: true
-      }, (responseUrl) => {
+      }, async (responseUrl) => {
         if (chrome.runtime.lastError) {
           statusDiv.textContent = `Ошибка: ${chrome.runtime.lastError.message}`;
           return;
@@ -88,9 +117,10 @@ document.addEventListener('DOMContentLoaded', function() {
           chrome.runtime.sendMessage({
             action: 'getFigmaToken',
             code: code
-          }, (response) => {
+          }, async (response) => {
             if (response && response.success) {
               statusDiv.textContent = 'Авторизация успешно завершена!';
+              await checkAuthStatus(); // Обновляем статус авторизации
             } else {
               statusDiv.textContent = 'Ошибка при получении токена доступа';
             }
