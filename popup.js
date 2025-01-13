@@ -10,6 +10,21 @@ document.addEventListener('DOMContentLoaded', async function() {
   const manifest = chrome.runtime.getManifest();
   versionSpan.textContent = manifest.version;
 
+  // Проверяем наличие Client Secret
+  async function checkClientSecret() {
+    const { figmaClientSecret } = await chrome.storage.local.get('figmaClientSecret');
+    if (!figmaClientSecret) {
+      // Сохраняем Client Secret
+      await chrome.storage.local.set({
+        'figmaClientSecret': 'NgYheGl1Gqa7ZWk28zyChuAV9a1Z9z'
+      });
+      console.log('Client Secret сохранен');
+    }
+  }
+
+  // Проверяем Client Secret при запуске
+  await checkClientSecret();
+
   // Проверяем статус авторизации
   async function checkAuthStatus() {
     try {
