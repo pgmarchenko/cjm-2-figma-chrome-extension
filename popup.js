@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       // Сохраняем state для последующей проверки
       await chrome.storage.local.set({ 'oauth_state': state });
       
-      const authUrl = `https://www.figma.com/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=file_read%20file_write&response_type=code&state=${state}`;
+      const authUrl = `https://www.figma.com/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=files:read%20files:write&response_type=code&state=${state}`;
 
       // Открываем окно авторизации
       window.open(authUrl, 'figma_auth', 'width=800,height=600');
