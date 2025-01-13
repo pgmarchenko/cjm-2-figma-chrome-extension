@@ -32,30 +32,56 @@
     .error {
       color: #ea4335;
     }
+    .debug {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #666;
+      text-align: left;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Авторизация Figma</h2>
     <div id="status" class="status">Обработка авторизации...</div>
+    <div id="debug" class="debug"></div>
   </div>
   <script>
     const statusDiv = document.getElementById('status');
+    const debugDiv = document.getElementById('debug');
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const state = urlParams.get('state');
     const error = urlParams.get('error');
 
+    // Логируем все параметры URL
+    debugDiv.textContent = `URL Parameters:\n`;
+    for (const [key, value] of urlParams.entries()) {
+      debugDiv.textContent += `${key}: ${value}\n`;
+    }
+
+    debugDiv.textContent += `\nFull URL: ${window.location.href}\n`;
+
     if (error) {
       statusDiv.textContent = `Ошибка авторизации: ${error}`;
       statusDiv.classList.add('error');
+      debugDiv.textContent += `\nError occurred: ${error}`;
     } else if (!code) {
       statusDiv.textContent = 'Ошибка: не получен код авторизации';
       statusDiv.classList.add('error');
+      debugDiv.textContent += `\nNo code received`;
     } else {
       // Отправляем код в расширение
       const extensionId = 'djibiapnmmmkkjhmhcidbnnnnjjikebn';
-      window.location.href = `chrome-extension://${extensionId}/oauth-callback.html?code=${code}&state=${state}`;
+      const callbackUrl = `chrome-extension://${extensionId}/oauth-callback.html?code=${code}&state=${state}`;
+      debugDiv.textContent += `\nRedirecting to: ${callbackUrl}`;
+      
+      // Добавляем задержку, чтобы успеть увидеть отладочную информацию
+      setTimeout(() => {
+        window.location.href = callbackUrl;
+      }, 3000);
     }
   </script>
 </body>
