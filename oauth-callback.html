@@ -25,69 +25,46 @@
       margin: 20px 0;
       font-size: 16px;
     }
-    .success {
-      color: #34a853;
-    }
-    .error {
-      color: #ea4335;
-    }
-    .debug {
-      margin-top: 20px;
-      font-size: 12px;
-      color: #666;
-      text-align: left;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Авторизация Figma</h2>
     <div id="status" class="status">Получение токена доступа...</div>
-    <div id="debug" class="debug"></div>
   </div>
   <script>
     const statusDiv = document.getElementById('status');
-    const debugDiv = document.getElementById('debug');
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const state = urlParams.get('state');
 
-    // Логируем все параметры URL
-    debugDiv.textContent = `URL Parameters:\n`;
-    for (const [key, value] of urlParams.entries()) {
-      debugDiv.textContent += `${key}: ${value}\n`;
-    }
-
-    debugDiv.textContent += `\nFull URL: ${window.location.href}\n`;
-
     if (code) {
-      debugDiv.textContent += `\nSending message to background script...`;
-      // Отправляем код в background script для получения токена
+      statusDiv.textContent = 'Получен код авторизации, получаем токен...';
+      
+      // Отправляем сообщение в background script для получения токена
       chrome.runtime.sendMessage({
         action: 'getFigmaToken',
         code: code
-      }, (response) => {
-        debugDiv.textContent += `\nResponse received: ${JSON.stringify(response, null, 2)}`;
+      }, async (response) => {
+        console.log('Получен ответ от background script:', response);
         
         if (response && response.success) {
           statusDiv.textContent = 'Авторизация успешно завершена!';
-          statusDiv.classList.add('success');
           
-          // Закрываем окно через 5 секунд
+          // Проверяем сохранение токена
+          const { figmaAccessToken } = await chrome.storage.local.get('figmaAccessToken');
+          console.log('Проверка сохраненного токена:', figmaAccessToken ? 'Токен существует' : 'Токен не найден');
+          
+          // Закрываем окно через 2 секунды
           setTimeout(() => {
             window.close();
-          }, 5000);
+          }, 2000);
         } else {
-          statusDiv.textContent = 'Ошибка при получении токена доступа';
-          statusDiv.classList.add('error');
+          statusDiv.textContent = 'Ошибка при получении токена доступа: ' + (response ? response.error : 'Неизвестная ошибка');
         }
       });
     } else {
       statusDiv.textContent = 'Ошибка: не получен код авторизации';
-      statusDiv.classList.add('error');
-      debugDiv.textContent += `\nNo code received`;
     }
   </script>
 </body>
