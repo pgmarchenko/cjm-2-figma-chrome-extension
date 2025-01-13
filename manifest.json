@@ -10,7 +10,8 @@
     "storage"
   ],
   "host_permissions": [
-    "https://api.figma.com/*"
+    "https://api.figma.com/*",
+    "https://pgmarchenko.github.io/*"
   ],
   "action": {
     "default_popup": "popup.html",
