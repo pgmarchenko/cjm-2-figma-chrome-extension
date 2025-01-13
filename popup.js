@@ -112,38 +112,13 @@ document.addEventListener('DOMContentLoaded', async function() {
       const redirectUri = 'https://pgmarchenko.github.io/cjm-2-figma-chrome-extension/oauth.html';
       const state = generateState();
       
-      const authUrl = `https://www.figma.com/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=file_read&response_type=code&state=${state}`;
+      // Сохраняем state для последующей проверки
+      await chrome.storage.local.set({ 'oauth_state': state });
+      
+      const authUrl = `https://www.figma.com/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=files&response_type=code&state=${state}`;
 
-      // Используем Chrome Identity API
-      chrome.identity.launchWebAuthFlow({
-        url: authUrl,
-        interactive: true
-      }, async (responseUrl) => {
-        if (chrome.runtime.lastError) {
-          statusDiv.textContent = `Ошибка: ${chrome.runtime.lastError.message}`;
-          return;
-        }
-
-        const urlParams = new URLSearchParams(new URL(responseUrl).search);
-        const code = urlParams.get('code');
-        
-        if (code) {
-          // Отправляем код в background script
-          chrome.runtime.sendMessage({
-            action: 'getFigmaToken',
-            code: code
-          }, async (response) => {
-            if (response && response.success) {
-              statusDiv.textContent = 'Авторизация успешно завершена!';
-              await checkAuthStatus(); // Обновляем статус авторизации
-            } else {
-              statusDiv.textContent = 'Ошибка при получении токена доступа';
-            }
-          });
-        } else {
-          statusDiv.textContent = 'Ошибка: код авторизации не получен';
-        }
-      });
+      // Открываем окно авторизации
+      window.open(authUrl, 'figma_auth', 'width=800,height=600');
     } catch (error) {
       statusDiv.textContent = `Ошибка подключения к Figma: ${error.message}`;
     }
