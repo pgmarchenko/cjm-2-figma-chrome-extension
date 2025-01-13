@@ -7,12 +7,17 @@
   "permissions": [
     "activeTab",
     "scripting",
-    "storage"
+    "storage",
+    "identity"
   ],
   "host_permissions": [
     "https://api.figma.com/*",
     "https://pgmarchenko.github.io/*"
   ],
+  "oauth2": {
+    "client_id": "TiuveWsSWiUY46CFhwAUL7",
+    "scopes": ["file_read"]
+  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

@@ -62,12 +62,43 @@ document.addEventListener('DOMContentLoaded', function() {
   // Подключение к Figma
   connectFigmaBtn.addEventListener('click', async () => {
     try {
-      // Открываем страницу авторизации Figma
+      statusDiv.textContent = 'Подключение к Figma...';
+      
       const clientId = 'TiuveWsSWiUY46CFhwAUL7';
       const redirectUri = 'https://pgmarchenko.github.io/cjm-2-figma-chrome-extension/oauth.html';
-      const authUrl = `https://www.figma.com/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=file_read&response_type=code&state=${generateState()}`;
+      const state = generateState();
       
-      chrome.tabs.create({ url: authUrl });
+      const authUrl = `https://www.figma.com/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=file_read&response_type=code&state=${state}`;
+
+      // Используем Chrome Identity API
+      chrome.identity.launchWebAuthFlow({
+        url: authUrl,
+        interactive: true
+      }, (responseUrl) => {
+        if (chrome.runtime.lastError) {
+          statusDiv.textContent = `Ошибка: ${chrome.runtime.lastError.message}`;
+          return;
+        }
+
+        const urlParams = new URLSearchParams(new URL(responseUrl).search);
+        const code = urlParams.get('code');
+        
+        if (code) {
+          // Отправляем код в background script
+          chrome.runtime.sendMessage({
+            action: 'getFigmaToken',
+            code: code
+          }, (response) => {
+            if (response && response.success) {
+              statusDiv.textContent = 'Авторизация успешно завершена!';
+            } else {
+              statusDiv.textContent = 'Ошибка при получении токена доступа';
+            }
+          });
+        } else {
+          statusDiv.textContent = 'Ошибка: код авторизации не получен';
+        }
+      });
     } catch (error) {
       statusDiv.textContent = `Ошибка подключения к Figma: ${error.message}`;
     }
