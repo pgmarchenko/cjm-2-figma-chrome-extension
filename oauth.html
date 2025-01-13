@@ -53,7 +53,8 @@
       statusDiv.classList.add('error');
     } else {
       // Отправляем код в расширение
-      window.location.href = `chrome-extension://djibiapnmmmkkjhmhcidbnnnnjjikebn/oauth-callback.html?code=${code}&state=${state}`;
+      const extensionId = 'djibiapnmmmkkjhmhcidbnnnnjjikebn';
+      window.location.href = `chrome-extension://${extensionId}/oauth-callback.html?code=${code}&state=${state}`;
     }
   </script>
 </body>
