@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Figma Screenshot Extension",
-  "version": "1.1",
+  "version": "1.2",
   "description": "Создание и экспорт скриншотов в Figma",
   "key": "djibiapnmmmkkjhmhcidbnnnnjjikebn",
   "permissions": [
