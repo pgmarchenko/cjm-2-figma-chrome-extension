@@ -33,7 +33,7 @@
   "web_accessible_resources": [
     {
       "resources": ["oauth-callback.html"],
-      "matches": ["https://pgmarchenko.github.io/*"]
+      "matches": ["<all_urls>"]
     }
   ],
   "externally_connectable": {
