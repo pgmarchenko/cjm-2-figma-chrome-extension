@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   const statusDiv = document.getElementById('status');
   const versionSpan = document.getElementById('version');
   const authStatusDiv = document.getElementById('authStatus');
+  const selectedFileDiv = document.getElementById('selectedFile');
 
   // Показываем версию расширения
   const manifest = chrome.runtime.getManifest();
@@ -25,23 +26,80 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Проверяем Client Secret при запуске
   await checkClientSecret();
 
-  // Проверяем статус авторизации
+  // Проверяем статус авторизации и выбранный файл
   async function checkAuthStatus() {
     try {
-      const { figmaAccessToken } = await chrome.storage.local.get('figmaAccessToken');
+      const { figmaAccessToken, selectedFigmaFile } = await chrome.storage.local.get(['figmaAccessToken', 'selectedFigmaFile']);
       if (figmaAccessToken) {
         authStatusDiv.textContent = 'Подключено к Figma';
         authStatusDiv.classList.add('authorized');
         authStatusDiv.classList.remove('unauthorized');
         connectFigmaBtn.textContent = 'Переподключить Figma';
+
+        if (selectedFigmaFile) {
+          selectedFileDiv.innerHTML = `Выбранный файл: ${selectedFigmaFile.name}<br>
+            <button id="changeFile">Изменить файл</button>`;
+          document.getElementById('changeFile').addEventListener('click', showFileSelector);
+        } else {
+          selectedFileDiv.innerHTML = '<button id="selectFile">Выбрать файл Figma</button>';
+          document.getElementById('selectFile').addEventListener('click', showFileSelector);
+        }
       } else {
         authStatusDiv.textContent = 'Требуется подключение к Figma';
         authStatusDiv.classList.add('unauthorized');
         authStatusDiv.classList.remove('authorized');
         connectFigmaBtn.textContent = 'Подключить Figma';
+        selectedFileDiv.textContent = '';
       }
     } catch (error) {
       console.error('Ошибка при проверке статуса авторизации:', error);
+    }
+  }
+
+  // Показываем диалог выбора файла
+  async function showFileSelector() {
+    try {
+      statusDiv.textContent = 'Загрузка списка файлов...';
+      
+      // Получаем список файлов через background script
+      chrome.runtime.sendMessage({
+        action: 'getFigmaFiles'
+      }, async (response) => {
+        if (response.success) {
+          const files = response.files;
+          
+          // Создаем диалог выбора файла
+          const fileList = document.createElement('div');
+          fileList.className = 'file-list';
+          
+          files.forEach(file => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.textContent = file.name;
+            fileItem.addEventListener('click', () => selectFile(file));
+            fileList.appendChild(fileItem);
+          });
+          
+          statusDiv.textContent = 'Выберите файл:';
+          selectedFileDiv.innerHTML = '';
+          selectedFileDiv.appendChild(fileList);
+        } else {
+          statusDiv.textContent = 'Ошибка при получении списка файлов: ' + response.error;
+        }
+      });
+    } catch (error) {
+      statusDiv.textContent = `Ошибка: ${error.message}`;
+    }
+  }
+
+  // Выбор файла
+  async function selectFile(file) {
+    try {
+      await chrome.storage.local.set({ 'selectedFigmaFile': file });
+      await checkAuthStatus();
+      statusDiv.textContent = `Выбран файл: ${file.name}`;
+    } catch (error) {
+      statusDiv.textContent = `Ошибка при выборе файла: ${error.message}`;
     }
   }
 
@@ -115,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       // Сохраняем state для последующей проверки
       await chrome.storage.local.set({ 'oauth_state': state });
       
-      const authUrl = `https://www.figma.com/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=file&response_type=code&state=${state}`;
+      const authUrl = `https://www.figma.com/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=file_read%20file_write&response_type=code&state=${state}`;
 
       // Открываем окно авторизации
       window.open(authUrl, 'figma_auth', 'width=800,height=600');

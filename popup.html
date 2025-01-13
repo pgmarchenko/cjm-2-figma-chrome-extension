@@ -6,62 +6,66 @@
   <style>
     body {
       width: 300px;
-      padding: 15px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    }
-    .container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      padding: 10px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     button {
-      padding: 8px 16px;
-      background-color: #1a73e8;
-      color: white;
-      border: none;
+      width: 100%;
+      margin: 5px 0;
+      padding: 8px;
+      border: 1px solid #ccc;
       border-radius: 4px;
+      background: white;
       cursor: pointer;
-      font-size: 14px;
     }
     button:hover {
-      background-color: #1557b0;
+      background: #f5f5f5;
     }
-    .status {
-      font-size: 14px;
-      color: #5f6368;
-      margin-top: 10px;
-    }
-    .version {
-      font-size: 12px;
-      color: #888;
-      text-align: right;
-      margin-top: 10px;
-    }
-    .auth-status {
-      font-size: 14px;
-      padding: 8px;
+    #status {
+      margin: 10px 0;
+      padding: 10px;
       border-radius: 4px;
-      margin-bottom: 10px;
     }
-    .auth-status.authorized {
-      background-color: #e6f4ea;
-      color: #137333;
+    .authorized {
+      color: #34a853;
     }
-    .auth-status.unauthorized {
-      background-color: #fce8e6;
-      color: #c5221f;
+    .unauthorized {
+      color: #ea4335;
+    }
+    .file-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .file-item {
+      padding: 8px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+    }
+    .file-item:hover {
+      background: #f5f5f5;
+    }
+    .file-item:last-child {
+      border-bottom: none;
+    }
+    #selectedFile {
+      margin: 10px 0;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div id="authStatus" class="auth-status"></div>
-    <button id="captureFullPage">Сделать скриншот страницы</button>
-    <button id="captureSelection">Выбрать область</button>
-    <button id="connectFigma">Подключить Figma</button>
-    <div class="status" id="status"></div>
-    <div class="version">Версия <span id="version"></span></div>
-  </div>
+  <div>Версия: <span id="version"></span></div>
+  <div id="authStatus"></div>
+  <div id="selectedFile"></div>
+  <button id="connectFigma">Подключить Figma</button>
+  <button id="captureFullPage">Сделать скриншот страницы</button>
+  <button id="captureSelection">Выбрать область</button>
+  <div id="status"></div>
   <script src="popup.js"></script>
 </body>
 </html> 

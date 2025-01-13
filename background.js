@@ -38,6 +38,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
     return true;
   }
+
+  if (request.action === 'getFigmaFiles') {
+    getFigmaFiles().then(sendResponse);
+    return true;
+  }
 });
 
 // Создание скриншота всей страницы
@@ -194,5 +199,38 @@ async function uploadToFigma(imageData, fileName) {
     };
   } catch (error) {
     throw new Error(`Ошибка при работе с Figma API: ${error.message}`);
+  }
+}
+
+// Получение списка файлов Figma
+async function getFigmaFiles() {
+  try {
+    const { figmaAccessToken } = await chrome.storage.local.get('figmaAccessToken');
+    if (!figmaAccessToken) {
+      throw new Error('Не найден токен доступа Figma');
+    }
+
+    // Получаем список файлов через Figma API
+    const response = await fetch('https://api.figma.com/v1/me/files', {
+      headers: {
+        'Authorization': `Bearer ${figmaAccessToken}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ошибка API Figma: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return {
+      success: true,
+      files: data.files
+    };
+  } catch (error) {
+    console.error('Ошибка при получении списка файлов:', error);
+    return {
+      success: false,
+      error: error.message
+    };
   }
 } 
