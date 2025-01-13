@@ -75,13 +75,33 @@
     } else {
       // Отправляем код в расширение
       const extensionId = 'djibiapnmmmkkjhmhcidbnnnnjjikebn';
-      const callbackUrl = `chrome-extension://${extensionId}/oauth-callback.html?code=${code}&state=${state}`;
-      debugDiv.textContent += `\nRedirecting to: ${callbackUrl}`;
+      debugDiv.textContent += `\nTrying to send message to extension...`;
       
-      // Добавляем задержку, чтобы успеть увидеть отладочную информацию
-      setTimeout(() => {
-        window.location.href = callbackUrl;
-      }, 3000);
+      try {
+        chrome.runtime.sendMessage(extensionId, {
+          action: 'getFigmaToken',
+          code: code,
+          state: state
+        }, response => {
+          debugDiv.textContent += `\nResponse received: ${JSON.stringify(response, null, 2)}`;
+          
+          if (response && response.success) {
+            statusDiv.textContent = 'Авторизация успешно завершена!';
+            statusDiv.classList.add('success');
+            
+            setTimeout(() => {
+              window.close();
+            }, 3000);
+          } else {
+            statusDiv.textContent = 'Ошибка при получении токена доступа';
+            statusDiv.classList.add('error');
+          }
+        });
+      } catch (error) {
+        debugDiv.textContent += `\nError sending message: ${error.message}`;
+        statusDiv.textContent = 'Ошибка при отправке сообщения расширению';
+        statusDiv.classList.add('error');
+      }
     }
   </script>
 </body>

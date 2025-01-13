@@ -35,5 +35,8 @@
       "resources": ["oauth-callback.html"],
       "matches": ["https://pgmarchenko.github.io/*"]
     }
-  ]
+  ],
+  "externally_connectable": {
+    "matches": ["https://pgmarchenko.github.io/*"]
+  }
 } 
