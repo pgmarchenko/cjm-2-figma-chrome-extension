@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Figma Screenshot Extension</title>
+  <style>
+    body {
+      width: 300px;
+      padding: 15px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background-color: #1557b0;
+    }
+    .status {
+      font-size: 14px;
+      color: #5f6368;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button id="captureFullPage">Сделать скриншот страницы</button>
+    <button id="captureSelection">Выбрать область</button>
+    <button id="connectFigma">Подключить Figma</button>
+    <div class="status" id="status"></div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html> 

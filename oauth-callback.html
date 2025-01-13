@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Авторизация Figma</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f5f5f5;
+    }
+    .container {
+      text-align: center;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .status {
+      margin: 20px 0;
+      font-size: 16px;
+    }
+    .success {
+      color: #34a853;
+    }
+    .error {
+      color: #ea4335;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Авторизация Figma</h2>
+    <div id="status" class="status">Получение токена доступа...</div>
+  </div>
+  <script>
+    const statusDiv = document.getElementById('status');
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+
+    if (code) {
+      // Отправляем код в background script для получения токена
+      chrome.runtime.sendMessage({
+        action: 'getFigmaToken',
+        code: code
+      }, (response) => {
+        if (response && response.success) {
+          statusDiv.textContent = 'Авторизация успешно завершена!';
+          statusDiv.classList.add('success');
+          
+          // Закрываем окно через 2 секунды
+          setTimeout(() => {
+            window.close();
+          }, 2000);
+        } else {
+          statusDiv.textContent = 'Ошибка при получении токена доступа';
+          statusDiv.classList.add('error');
+        }
+      });
+    } else {
+      statusDiv.textContent = 'Ошибка: не получен код авторизации';
+      statusDiv.classList.add('error');
+    }
+  </script>
+</body>
+</html> 
